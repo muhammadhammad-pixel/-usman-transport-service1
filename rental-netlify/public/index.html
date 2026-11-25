@@ -1,0 +1,144 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Rentals</title>
+<style id="pg"></style>
+<style>
+:root{--a:#5b21e6;--g:#16a34a;--r:#e11d2e;--b:#e6dcef;--t:#1f1730;--bg:#f3e8fa}
+*{box-sizing:border-box}body{margin:0;font:15px system-ui,Segoe UI,sans-serif;color:var(--t);background:#d9c8e6}
+#app{max-width:480px;min-height:100vh;margin:0 auto;background:var(--bg);position:relative;padding-bottom:60px}
+header{display:flex;gap:6px;align-items:center;padding:10px 14px;position:sticky;top:0;background:var(--bg);z-index:5}
+header i{margin-left:auto}header button{border:0;background:none;font-size:20px;padding:4px 8px}
+main{padding:6px 14px 14px}h3{margin:6px 0}
+button,.btn{font:inherit;font-weight:600;padding:11px 14px;border:1px solid var(--b);background:#fff;border-radius:12px;cursor:pointer;display:inline-block;text-align:center}
+.pri{background:var(--a);color:#fff;border-color:var(--a)}.grn{background:var(--g);color:#fff;border-color:var(--g)}.red{background:var(--r);color:#fff;border-color:var(--r)}.w{width:100%}
+a.l,.lk{color:var(--a);font-size:13px;text-decoration:underline;cursor:pointer;background:none;border:0;padding:4px;font-weight:400}
+input,textarea,select{font:inherit;width:100%;padding:10px;border:1px solid #cbbfd8;border-radius:10px;margin-top:4px;background:#fff}
+label{display:block;margin:8px 0;font-size:13px;color:#5b4d70}.card{background:#fff;border:1px solid var(--b);border-radius:16px;padding:14px;margin-bottom:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.row>*{flex:1}.item{display:flex;justify-content:space-between;gap:8px;cursor:pointer}
+.badge{font-size:11px;padding:2px 8px;border-radius:99px;background:#ede9fe;font-weight:600}.badge.out{background:#dbeafe}.badge.returned{background:#dcfce7}.badge.cancelled{background:#fee2e2}
+.big{display:flex;justify-content:space-between;font-size:17px;margin:5px 0}.bal{color:var(--r);font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{font-size:12px;padding:3px 9px;border:1px solid var(--b);border-radius:99px;background:#f8f5fb;margin:0;display:inline-flex;gap:4px;align-items:center}.chip input{width:auto;margin:0}.ok{background:#dcfce7;border-color:#86efac}
+#m{display:none;position:fixed;inset:0;background:#0007;z-index:20;overflow:auto;padding:12px}#m.show{display:block}.box{background:#fff;max-width:480px;margin:0 auto;padding:16px;border-radius:18px}
+.tabs{display:flex;gap:6px;margin:8px 0;flex-wrap:wrap}.tabs button{flex:1;padding:8px 6px;font-size:13px}.tabs .on{background:#fee2e2;border-color:var(--r)}
+canvas#sg{width:100%;border:1px dashed #94a3b8;border-radius:10px;touch-action:none;background:#fff;margin-top:8px}video{width:100%;border-radius:10px;background:#000}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:8px}.slot{border:1px dashed #94a3b8;border-radius:12px;min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;cursor:pointer;padding:6px;text-align:center}.slot img{max-width:100%;max-height:100px}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--bg);border-top:1px solid var(--b);display:flex;justify-content:center;gap:30px;padding:10px;font-size:13px}
+small{color:#7a6c8c}.c{text-align:center}#print{display:none}
+@media print{body>*:not(#print){display:none!important}#print{display:block;background:#fff;color:#000}body{background:#fff}}
+#print .d{font:12px Arial,sans-serif}#print.rc .d{font-size:10px;width:54mm}#print h2,#print h3{text-align:center;margin:4px 0}#print h4{border-bottom:1px dashed #000;margin:8px 0 3px;font-size:1.05em}
+#print .pr{display:flex;justify-content:space-between;gap:6px}#print .lg{display:block;margin:0 auto;max-height:70px}#print .pp{display:block;margin:6px auto;height:90px}
+#print .sg{height:40px}#print.rc .sg{height:28px}#print .cn{height:70px;margin-right:4px}#print ol{padding-left:16px;margin:4px 0}#print.rc ol{padding-left:12px}
+</style></head><body><div id="app"></div><div id="m"></div><div id="print"></div>
+<script>
+// ===== EDIT THESE LATER =====
+const CONFIG={name:"YOUR BUSINESS NAME",address:"",phone:"",logo:""}; // logo = image data URL
+const TERMS=["The vehicle is rented, not sold, and is held by the renter in trust. The renter may not hand it to anyone else.","The company is not responsible for any accident, theft, injury, loss, robbery or offence in which the vehicle is used while on rent.","Any damage in an accident is the renter's responsibility.","Traffic fines (challans) are paid by the renter.","The vehicle must be returned on the agreed date and time; late return is charged at the agreed rate.","Fuel must be returned at the level given out, or the difference is charged.","The vehicle may not be used for illegal purposes, racing or towing.","Only the renter may drive the vehicle unless approved in writing.","The vehicle may not be taken outside the agreed destination without permission.","Security items and deposit are returned only after inspection of the vehicle.","The guarantor is equally responsible for all terms and dues.","Give two days' notice of any change to a booking."];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const M=n=>"Rs."+(+n||0).toLocaleString(),R=id=>DB.rentals.find(x=>x.id==id);
+const days=r=>{const a=new Date(r.out),b=new Date(r.ret);return b>a?Math.max(1,Math.ceil((b-a-36e5)/864e5)):1} /* 1-hour grace, as in the video */,bill=r=>(+r.rate||0)*days(r),paid=r=>r.pay.reduce((s,p)=>s+ +p.amt,0);
+const fdt=s=>s?new Date(s).toLocaleString("en-GB",{dateStyle:"medium",timeStyle:"short"}):"";
+let key,auth,salt,DB,view={n:"list"},timer,stream,hasVault=false,last={},lastNext=0,busy=Promise.resolve();
+// ---- encryption happens HERE in the browser (AES-256-GCM); the server only ever sees unreadable data ----
+const b64=u=>{let s="";for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode(...u.subarray(i,i+8192));return btoa(s)},ub=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function derive(pw,s){const k=await crypto.subtle.importKey("raw",new TextEncoder().encode(pw),"PBKDF2",false,["deriveBits"]),bits=new Uint8Array(await crypto.subtle.deriveBits({name:"PBKDF2",salt:s,iterations:250000,hash:"SHA-256"},k,512));
+key=await crypto.subtle.importKey("raw",bits.slice(0,32),"AES-GCM",false,["encrypt","decrypt"]);auth=[...bits.slice(32)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+const enc=async o=>{const iv=crypto.getRandomValues(new Uint8Array(12));return{iv:b64(iv),ct:b64(new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv},key,new TextEncoder().encode(JSON.stringify(o)))))}};
+const dec=async v=>JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:ub(v.iv)},key,ub(v.ct))));
+const api=(m,u,b)=>fetch("/api/"+u,{method:m,headers:{"x-auth":auth||"","Content-Type":"application/json"},body:b&&JSON.stringify(b)});
+const txtOf=r=>JSON.stringify(r,(k,v)=>k=="_li"?undefined:typeof v=="string"&&v.startsWith("data:")?"1":v),imgOf=r=>JSON.stringify({sig:r.sig,ph:r.ph,th:r.th});
+const put=async(k,o)=>{const r=await api("PUT","rec?k="+k,await enc(o));if(!r.ok){alert("Save failed – check the internet connection.");throw 0}};
+function save(){return busy=busy.catch(()=>{}).then(async()=>{for(const r of DB.rentals){const t=txtOf(r);if(last["r:"+r.id]!=t){await put("r:"+r.id,JSON.parse(t));last["r:"+r.id]=t}
+if(r._li){const i=imgOf(r);if(last["i:"+r.id]!=i){await put("i:"+r.id,JSON.parse(i));last["i:"+r.id]=i}}}
+if(lastNext!=DB.next){await put("idx",{next:DB.next});lastNext=DB.next}})}
+async function loadImgs(r){if(r._li)return;const x=await api("GET","rec?k=i:"+r.id);if(x.ok){const o=await dec(await x.json());for(const k of["sig","ph","th"])Object.assign(r[k],o[k])}r._li=1}
+async function unlock(pw){const st=await(await fetch("/api/status")).json();last={};
+if(!st.exists){salt=crypto.getRandomValues(new Uint8Array(16));await derive(pw,salt);const r=await fetch("/api/setup",{method:"POST",body:JSON.stringify({salt:b64(salt),auth,...await enc({next:1})})});if(!r.ok)return false;DB={rentals:[],next:1};lastNext=1;return true}
+salt=ub(st.salt);await derive(pw,salt);const r=await api("GET","rec?k=idx");if(!r.ok){key=auth=null;return false}
+DB={next:(await dec(await r.json())).next,rentals:[]};lastNext=DB.next;const ids=await(await api("GET","list?p=r:")).json();
+DB.rentals=await Promise.all(ids.map(async k=>{const o=await dec(await(await api("GET","rec?k="+k)).json());last[k]=txtOf(o);return o}));DB.rentals.sort((a,b)=>a.id-b.id);return true}
+function lock(){key=auth=DB=null;closeM();render()}
+["click","keydown","pointerdown"].forEach(e=>addEventListener(e,()=>{clearTimeout(timer);if(key)timer=setTimeout(lock,6e5)}));
+async function exportB(){const recs={};for(const p of["r:","i:"])for(const k of await(await api("GET","list?p="+p)).json())recs[k]=await(await api("GET","rec?k="+k)).json();recs.idx=await(await api("GET","rec?k=idx")).json();
+const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({salt:b64(salt),recs})]));a.download="rental-backup-"+new Date().toISOString().slice(0,10)+".json";a.click()}
+function importB(f){if(!f)return;const fr=new FileReader();fr.onload=async()=>{try{const b=JSON.parse(fr.result);if(b.salt!=b64(salt))return alert("This backup belongs to a different vault/password and can't be restored here.");if(!confirm("Overwrite current records with this backup?"))return;
+for(const[k,v]of Object.entries(b.recs))await put2(k,v);alert("Restored. Please log in again.");location.reload()}catch{alert("Invalid backup file")}};fr.readAsText(f)}
+const put2=async(k,v)=>{const r=await api("PUT","rec?k="+k,v);if(!r.ok)throw 0};
+// ---- shell ----
+async function render(){const a=$("#app");
+if(!key){a.innerHTML=`<main><div class=card style="margin-top:60px"><h2>${hasVault?"Log in":"Create password"}</h2><small>${hasVault?"Enter your password.":"This password protects and encrypts all data. It cannot be recovered – keep it safe and make backups."}</small><form id=lf><label>Password<input type=password id=pw autofocus minlength=6 required></label>${hasVault?"":"<label>Confirm<input type=password id=pw2 required></label>"}<button class="pri w">${hasVault?"Log in":"Create"}</button><p id=le style="color:var(--r)"></p></form></div></main>`;
+$("#lf").onsubmit=async e=>{e.preventDefault();if(!hasVault&&$("#pw").value!=$("#pw2").value)return $("#le").textContent="Passwords differ";$("#le").textContent="Working…";if(await unlock($("#pw").value)){hasVault=true;render()}else $("#le").textContent="Wrong password"};return}
+const late=DB.rentals.filter(r=>r.status=="out"&&new Date(r.ret)<new Date()).length;
+a.innerHTML=`<header><button onclick="menu()">☰</button><i></i><button onclick="bell()">🔔${late?`<sup style="color:var(--r);font-size:12px">${late}</sup>`:""}</button><button onclick="lock()">⎋</button></header><main id=v></main><nav><a class=lk onclick="go('list')">Rentals</a><a class=lk onclick="form()">+ New booking</a></nav>`;
+const v=$("#v");view.n=="list"?list(v):detail(v,R(view.id))}
+const go=(n,id)=>{view={n,id};render()},commit=async()=>{await save();render()};
+const menu=()=>modal(`<h3>Menu</h3><div class=row style="flex-direction:column"><button onclick="closeM();go('list')">Rentals</button><button onclick="closeM();form()">New booking</button><button onclick="exportB()">Download encrypted backup</button><label class=btn>Restore backup<input type=file hidden onchange="importB(this.files[0])"></label><button onclick="closeM()">Close</button></div>`);
+const bell=()=>{const l=DB.rentals.filter(r=>r.status=="out"&&new Date(r.ret)<new Date());modal(`<h3>Overdue returns</h3>${l.map(r=>`<div class="card item" onclick="closeM();go('d',${r.id})"><span>#${r.id} ${esc(r.renter.name)} – ${esc(r.car.reg)}</span><small>due ${fdt(r.ret)}</small></div>`).join("")||"<p>Nothing overdue.</p>"}<button class=w onclick="closeM()">Close</button>`)};
+function list(v){const q=(view.q||"").toLowerCase(),rs=[...DB.rentals].reverse().filter(r=>(r.renter.name+r.car.reg+r.id).toLowerCase().includes(q));
+v.innerHTML=`<h3>Rentals</h3><input id=sq placeholder="Search renter, car no, contract no…" value="${esc(view.q)}"><div style="height:10px"></div>${rs.map(r=>`<div class="card item" onclick="go('d',${r.id})"><div><b>#${r.id} ${esc(r.renter.name)}</b><br><small>${esc(r.car.reg)} ${esc(r.car.model)} · ${fdt(r.out)}</small></div><div style="text-align:right"><span class="badge ${r.status}">${r.status}</span><br><span class=bal>${r.status!="cancelled"&&bill(r)-paid(r)?M(bill(r)-paid(r)):""}</span></div></div>`).join("")||"<p class=c><small>No rentals yet. Tap “+ New booking”.</small></p>"}`;
+$("#sq").oninput=e=>{view.q=e.target.value;list(v);const s=$("#sq");s.focus();s.setSelectionRange(99,99)}}
+// ---- booking form ----
+const F=[["#Renter"],["Name","renter.name"],["Father / husband name","renter.father"],["CNIC","renter.cnic"],["Phone","renter.phone"],["Address","renter.addr"],["#Guarantor"],["Name","guar.name"],["Father / husband name","guar.father"],["CNIC","guar.cnic"],["Phone","guar.phone"],["Address","guar.addr"],["#Car"],["Registration no.","car.reg"],["Model","car.model"],["Colour","car.color"],["Chassis no.","car.chassis"],["Engine no.","car.engine"],["#Rental"],["Time out","out","datetime-local"],["Return time","ret","datetime-local"],["Going to","dest"],["Booked by","by"],["Agreed rate / day","rate","number"]];
+const getp=(o,p)=>p.split(".").reduce((a,k)=>a?.[k],o);
+function setp(o,p,v){const k=p.split(".");let t=o;while(k.length>1){const a=k.shift();t=t[a]??={}}t[k[0]]=v}
+function form(id){const r=id?R(id):{};$("#v").innerHTML=`<form id=f class=card><h3>${id?"Edit #"+id:"New booking"}</h3>${F.map(f=>f[0][0]=="#"?`<h3 style="margin-top:14px">${f[0].slice(1)}</h3>`:`<label>${f[0]}<input name="${f[1]}" type="${f[2]||"text"}" value="${esc(getp(r,f[1]))}"></label>`).join("")}<div class=row><button class=pri>Save</button><button type=button onclick="${id?`go('d',${id})`:"go('list')"}">Cancel</button></div></form>`;
+$("#f").onsubmit=async e=>{e.preventDefault();const o=id?r:{id:DB.next++,status:"booked",pay:[],sig:{},ph:{},th:{},items:[],renter:{},guar:{},car:{},_li:1};for(const[k,v]of new FormData(e.target))setp(o,k,v);if(!id)DB.rentals.push(o);view={n:"d",id:o.id};commit()}}
+// ---- rental screen (as in the video) ----
+const CK=[["sig.owner","Owner / manager"],["sig.renter","Renter"],["sig.guar","Guarantor"],["ph.renter","Renter photo"],["ph.cnicF","CNIC front"],["ph.cnicB","CNIC back"],["th.renter","Renter thumb"],["th.guar","Guarantor thumb"]];
+function detail(v,r){const done=CK.filter(c=>getp(r,c[0])).length,inv="INV-"+String(r.id).padStart(6,"0");
+v.innerHTML=`<div class=card><div class=big style="font-size:14px"><span>${esc(r.car.reg)} #${r.id} – ${days(r)} day${days(r)>1?"s":""} <span class="badge ${r.status}">${r.status}</span></span><b>${M(bill(r))}</b></div><small>${esc(r.renter.name)} · ${fdt(r.out)} → ${fdt(r.ret)}</small>
+<div class=big><span>Bill</span><b>${M(bill(r))}</b></div><div class=big><span>Paid</span><b>${M(paid(r))}</b></div><div class=big><span>Balance</span><b class=bal>${M(bill(r)-paid(r))}</b></div><small>${inv}</small>
+<div class=big style="font-size:14px;margin-top:14px"><b>Signatures & photos</b><span class=badge style="background:${done==8?"#dcfce7":"#fef3c7"}">${done}/8</span></div>
+<div class=chips>${CK.map(c=>`<span class="chip ${getp(r,c[0])?"ok":""}">${getp(r,c[0])?"✓":"○"} ${c[1]}</span>`).join("")}</div>
+<button class="red w" style="margin-top:12px" onclick="cap(${r.id})">✍ ${done?"View / redo signatures":"Take signatures"}</button>
+<div class=row><button onclick="prn(${r.id},'rc')">🖨 Print contract</button><button class=grn onclick="wa(${r.id},1)">WhatsApp</button></div>
+<div class=row style="margin-top:2px"><a class=lk onclick="prn(${r.id},'a4')">A4 page / Save as PDF</a><a class=lk style="text-align:right" onclick="wa(${r.id},0)">Text message only</a></div>
+${r.status=="booked"?`<button class="pri w" style="margin-top:8px" onclick="handover(${r.id})">Hand over the car</button>`:r.status=="out"?`<button class="grn w" style="margin-top:8px" onclick="checkin(${r.id})">Check in</button>`:""}
+<div class=row>${r.status=="out"?`<button onclick="dates(${r.id})">Extend</button>`:`<button onclick="dates(${r.id})">Change dates</button>`}<button onclick="pay(${r.id})">Take payment</button></div>
+<div class=row><button onclick="form(${r.id})">Edit details</button></div>
+${r.status=="booked"?`<p class=c><a class=lk style="color:var(--r)" onclick="cancelB(${r.id})">Cancel booking</a></p>`:""}</div>
+${r.pay.length?`<div class=card><b>Payments</b>${r.pay.map(p=>`<div class=big style="font-size:14px"><span>${fdt(p.d)} ${esc(p.note)}</span><b>${M(p.amt)}</b></div>`).join("")}</div>`:""}
+${r.status=="out"||r.status=="returned"?`<div class=card><b>Hand-over record</b><br><small>Fuel ${esc(r.fuel)} · Meter ${esc(r.meter)} · Deposit ${M(r.dep)}<br>${esc([...(r.items||[]),r.extra].filter(Boolean).join(", "))}<br>${esc(r.dent)}${r.status=="returned"?`<br>Returned: fuel ${esc(r.fuelIn)}, meter ${esc(r.meterIn)} ${esc(r.condIn)}`:""}</small></div>`:""}`}
+function wa(id,full){const r=R(id);let p=(r.renter.phone||"").replace(/\D/g,"");if(p[0]=="0")p="92"+p.slice(1);
+const t=`${CONFIG.name}\nRental Agreement ${r.id}\n${r.renter.name} – ${r.car.model} ${r.car.reg}\nOut: ${fdt(r.out)}\nReturn: ${fdt(r.ret)}\nBill ${M(bill(r))}, Paid ${M(paid(r))}, Balance ${M(bill(r)-paid(r))}`,op=()=>open(`https://wa.me/${p}?text=${encodeURIComponent(t)}`);
+if(full){alert("Save the contract as PDF first, then WhatsApp opens – attach the PDF there.");onafterprint=()=>{onafterprint=null;op()};prn(id,"a4")}else op()}
+function ask(title,fs,cb){modal(`<h3>${title}</h3><form id=af>${fs.map(f=>f.t=="chk"?`<div>${f.l}</div><div class=chips>${f.o.map(o=>`<label class=chip><input type=checkbox name="${f.n}" value="${o}" ${(f.v||[]).includes(o)?"checked":""}>${o}</label>`).join("")}</div>`:f.t=="ta"?`<label>${f.l}<textarea name="${f.n}">${esc(f.v)}</textarea></label>`:`<label>${f.l}<input name="${f.n}" type="${f.t||"text"}" value="${esc(f.v)}"></label>`).join("")}<div class=row><button class=pri>Save</button><button type=button onclick="closeM()">Cancel</button></div></form>`);
+$("#af").onsubmit=e=>{e.preventDefault();const d=new FormData(e.target),o={};for(const f of fs)o[f.n]=f.t=="chk"?d.getAll(f.n):d.get(f.n);closeM();cb(o)}}
+const pay=id=>ask("Take payment",[{n:"amt",l:"Amount",t:"number"},{n:"note",l:"Note"}],o=>{if(+o.amt>0){R(id).pay.push({d:new Date().toISOString(),amt:+o.amt,note:o.note});commit()}});
+const dates=id=>{const r=R(id);ask("Change / extend dates",[{n:"out",l:"Time out",t:"datetime-local",v:r.out},{n:"ret",l:"Return time",t:"datetime-local",v:r.ret}],o=>{r.out=o.out;r.ret=o.ret;commit()})};
+const handover=id=>{const r=R(id);ask("Hand over the car",[{n:"fuel",l:"Fuel out (e.g. 6/8)",v:r.fuel},{n:"meter",l:"Meter reading",t:"number",v:r.meter},{n:"items",l:"In the car",t:"chk",o:["Deck","Speaker","Stepney","Jack","Rod","Spanner"],v:r.items},{n:"extra",l:"Something else in the car",v:r.extra},{n:"dent",l:"Dents, scratches, condition",t:"ta",v:r.dent},{n:"sec",l:"Security left (e.g. Motorcycle Honda CD-70, original CNIC)",v:r.sec},{n:"dep",l:"Security deposit (cash)",t:"number",v:r.dep}],o=>{Object.assign(r,{fuel:o.fuel,meter:o.meter,items:o.items,extra:o.extra,dent:o.dent,sec:o.sec,dep:o.dep,status:"out",outAt:new Date().toISOString()});commit()})};
+const checkin=id=>{const r=R(id);ask("Check in",[{n:"fi",l:"Fuel in"},{n:"mi",l:"Meter in",t:"number"},{n:"ci",l:"Condition on return",t:"ta"}],o=>{Object.assign(r,{fuelIn:o.fi,meterIn:o.mi,condIn:o.ci,status:"returned",inAt:new Date().toISOString()});commit()})};
+const cancelB=id=>{if(confirm("Cancel this booking?")){R(id).status="cancelled";commit()}};
+// ---- modal, signatures, photos, thumbs ----
+function modal(h){stopCam();$("#m").innerHTML=`<div class=box>${h}</div>`;$("#m").className="show"}
+function closeM(){stopCam();$("#m").className="";$("#m").innerHTML=""}
+function stopCam(){stream?.getTracks().forEach(t=>t.stop());stream=null}
+const shrink=(src,w)=>new Promise(res=>{const i=new Image();i.onload=()=>{const s=Math.min(1,w/i.width),c=document.createElement("canvas");c.width=i.width*s;c.height=i.height*s;c.getContext("2d").drawImage(i,0,0,c.width,c.height);res(c.toDataURL("image/jpeg",.75))};i.src=src});
+async function cap(id,tab="sign",who="owner"){const r=R(id);await loadImgs(r);const W=[["owner","Owner / manager"],["renter","Renter"],["guar","Guarantor"]];
+let h=`<div class=big><b>Signatures – #${id}</b><a class=lk onclick="closeM();render()" style="font-size:20px">✕</a></div><div class=tabs>${[["sign","Signatures"],["photo","Photos"],["thumb","Thumbs"]].map(t=>`<button class="${t[0]==tab?"on":""}" onclick="cap(${id},'${t[0]}')">${t[1]}</button>`).join("")}</div>`;
+if(tab=="sign")h+=`<div class=tabs>${W.map(w=>`<button class="${w[0]==who?"on":""}" onclick="cap(${id},'sign','${w[0]}')">${r.sig[w[0]]?"✓ ":""}${w[1]}</button>`).join("")}</div><small>${esc(who=="owner"?"Owner / manager":who=="renter"?r.renter.name:r.guar.name)} – sign in the box${r.sig[who]?" (saving again replaces the old one)":""}.</small><canvas id=sg width=640 height=240></canvas><div class=row><button onclick="initPad()" style="flex:.4">Clear</button><button class="red" onclick="saveSig(${id},'${who}')">Save signature</button></div><p class=c><a class=lk onclick="closeM();render()">Later</a></p>`;
+if(tab=="photo")h+=`<small>Tap a box: the camera opens (or upload a file).</small><div class=g3>${[["renter","Renter photo"],["cnicF","CNIC front"],["cnicB","CNIC back"]].map(p=>`<div class=slot onclick="camera(${id},'ph','${p[0]}')">${r.ph[p[0]]?`<img src="${r.ph[p[0]]}">`:"📷"}<b>${p[1]}</b></div>`).join("")}</div><p class=c><button class=w onclick="closeM();render()">Done</button></p>`;
+if(tab=="thumb")h+=`<small>Take each person's thumbprint on the scanner, or by camera/upload.</small><div class=g3>${[["renter","Renter thumb"],["guar","Guarantor thumb"]].map(p=>`<div><div class=slot>${r.th[p[0]]?`<img src="${r.th[p[0]]}">`:"👍"}<b>${p[1]}</b></div><div class=row style="flex-direction:column"><button class=red onclick="scan(${id},'${p[0]}')">Scan on the scanner</button><button onclick="camera(${id},'th','${p[0]}')">Camera / upload</button></div></div>`).join("")}</div><p id=tm class=c></p><p class=c><button class=w onclick="closeM();render()">Done</button></p>`;
+modal(h);if(tab=="sign")initPad()}
+function initPad(){const c=$("#sg"),x=c.getContext("2d");x.clearRect(0,0,c.width,c.height);x.lineCap=x.lineJoin="round";x.strokeStyle="#111";let d=0,p;
+const pt=e=>{const b=c.getBoundingClientRect();return[(e.clientX-b.left)*c.width/b.width,(e.clientY-b.top)*c.height/b.height]};
+c.onpointerdown=e=>{d=1;p=pt(e);c.setPointerCapture(e.pointerId)};c.onpointermove=e=>{if(!d)return;const q=pt(e);x.lineWidth=1.5+(e.pressure||.5)*3;x.beginPath();x.moveTo(...p);x.lineTo(...q);x.stroke();p=q};c.onpointerup=()=>d=0}
+async function saveSig(id,who){const c=$("#sg");if(!c.getContext("2d").getImageData(0,0,c.width,c.height).data.some((v,i)=>i%4==3&&v))return alert("Please sign first.");R(id).sig[who]=c.toDataURL("image/png");await save();cap(id,"sign",who==="owner"?"renter":who=="renter"?"guar":who)}
+async function camera(id,g,k){const r=R(id),back=g=="ph"?"photo":"thumb";
+modal(`<h3>${g=="ph"?"Take photo":"Thumb picture"}</h3><video id=cv autoplay playsinline muted></video><div class=row><button class=pri id=sn>Capture</button><label class=btn>Upload file<input type=file accept="image/*" hidden id=up></label><button onclick="cap(${id},'${back}')">Back</button></div><small id=cm></small>`);
+const done=async d=>{r[g][k]=await shrink(d,g=="ph"?800:400);await save();cap(id,back)};
+$("#up").onchange=e=>{const f=e.target.files[0];if(!f)return;const fr=new FileReader();fr.onload=()=>done(fr.result);fr.readAsDataURL(f)};
+try{stream=await navigator.mediaDevices.getUserMedia({video:k=="renter"&&g=="ph"?{facingMode:"user"}:true});$("#cv").srcObject=stream;$("#sn").onclick=()=>{const v=$("#cv"),c=document.createElement("canvas");c.width=v.videoWidth;c.height=v.videoHeight;c.getContext("2d").drawImage(v,0,0);done(c.toDataURL("image/jpeg"))}}catch{$("#cm").textContent="Camera unavailable – use Upload file."}}
+async function scan(id,k){const t=$("#tm");t.textContent="Place thumb on the scanner…";
+for(const u of["https://localhost:8443","https://localhost:8000"]){try{const j=await(await fetch(u+"/SGIFPCapture",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:"Timeout=10000&Quality=50&licstr=&templateFormat=ISO&imageWH=300"})).json();
+if(j.ErrorCode===0){R(id).th[k]=await shrink("data:image/bmp;base64,"+j.BMPBase64,300);await save();return cap(id,"thumb")}t.textContent="Scanner error code "+j.ErrorCode;return}catch{}}
+t.textContent="SecuGen WebAPI service (SgiBioSrv) not found. Install/start it, open https://localhost:8443 once to accept its certificate, or use Camera / upload."}
+// ---- printing ----
+async function prn(id,m){const r=R(id);await loadImgs(r);const row=(a,b)=>b?`<div class=pr><span>${a}</span><b>${esc(b)}</b></div>`:"",im=(s,c)=>s?`<img class="${c}" src="${s}">`:"",S=t=>`<h4>${t}</h4>`;
+const pe=p=>row("Name",p.name)+row("Father / husband",p.father)+row("CNIC",p.cnic)+row("Phone",p.phone)+row("Address",p.addr);
+const sg=[["Renter","renter","renter"],["Guarantor","guar","guar"],["Manager","owner",""]].map(s=>`<div>${s[0]} signature<br>${im(r.sig[s[1]],"sg")}${s[2]?`<br>${s[0]} thumb<br>${im(r.th[s[2]],"sg")}`:""}</div>`).join("");
+$("#print").className=m;$("#print").innerHTML=`<div class=d>${im(CONFIG.logo,"lg")}<h2>${esc(CONFIG.name)}</h2><p style="text-align:center;margin:0">${esc(CONFIG.address)} ${esc(CONFIG.phone)}</p><h3>Rental Agreement<br>${r.id}</h3>${im(r.ph.renter,"pp")}
+${S("Renter")}${pe(r.renter)}${S("Guarantor")}${pe(r.guar)}${S("Car")}${row("Registration no.",r.car.reg)}${row("Model",r.car.model)}${row("Colour",r.car.color)}${row("Chassis no.",r.car.chassis)}${row("Engine no.",r.car.engine)}${row("Time out",fdt(r.out))}${row("Return time",fdt(r.ret))}${row("Going to",r.dest)}${row("Booked by",r.by)}${row("Fuel out",r.fuel)}${row("Meter out",r.meter)}${row("In the car",[...(r.items||[]),r.extra].filter(Boolean).join(", "))}${row("Condition",r.dent)}
+${S("Security left")}${row("Items",r.sec)}${row("Agreed rate",M(r.rate)+" / day")}${row("Estimated rent",M(bill(r)))}${row("Paid",M(paid(r)))}${row("Balance",M(bill(r)-paid(r)))}${row("Security deposit (cash)",r.dep?M(r.dep):"")}
+${m=="a4"&&(r.ph.cnicF||r.ph.cnicB)?S("CNIC pictures")+im(r.ph.cnicF,"cn")+im(r.ph.cnicB,"cn"):""}${S("Terms")}<ol>${TERMS.map(t=>`<li>${t}</li>`).join("")}</ol><p>We have read these terms carefully and sign in full senses.</p>${sg}</div>`;
+$("#pg").textContent=m=="rc"?"@page{size:58mm auto;margin:1mm}":"@page{size:A4;margin:12mm}";setTimeout(()=>print(),400)}
+fetch("/api/status").then(r=>r.json()).then(s=>{hasVault=s.exists;render()}).catch(()=>{$("#app").innerHTML="<main><div class=card><h3>Can't reach the server</h3><p>Check the internet connection and reload.</p></div></main>"});
+</script></body></html>
